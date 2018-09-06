@@ -1,5 +1,9 @@
 const clova = require("@line/clova-cek-sdk-nodejs");
-//const bodyParser = require("body-parser");
+const line = require('@line/bot-sdk');
+const util = require('util');
+const client = new line.Client({
+  channelAccessToken: process.env["channelAccessToken"]
+});
 const { breakFirst, lunch, dinner } = require("./menus");
 
 const clovaSkillHandler = clova.Client
@@ -41,6 +45,34 @@ const clovaSkillHandler = clova.Client
         responseHelper.setSimpleSpeech(
           clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は、${menu.name}です。`)
         );
+
+        // TODO Botにメッセージを送る
+        // ここからBot
+        const userId = responseHelper.getUser().userId;
+        var message = {
+          type: "template",
+          altText: `hoge`,
+          template: {
+            type: "buttons",
+            actions: [
+              {
+                type: "uri",
+                label: `レシピを見る`,
+                uri: "https://hogehoge",
+              }, 
+            ], 
+            thumbnailImageUrl: "https://hogehoge",
+            title: `今日のあなたの${time}ご飯は、${menu.name}だ!!`,
+            text: `今日のあなたの${time}ご飯は、${menu.name}だ!!`
+          }
+        }
+        // Botに送信
+        await client.pushMessage(userId, message)
+          .catch( err => {
+            console.log("-- err ---");
+            console.log(util.inspect(err), false, null);
+          });
+
         break;
       case "Clova.YesIntent":
       case "Clova.NoIntent":
@@ -57,8 +89,7 @@ const clovaSkillHandler = clova.Client
 
 exports.handler = async (event, content) => {
   console.log("--- event ---");
-  console.log(event);
-  console.log("--- event end ---");
+  console.log(util.inspect(event), false, null);
 
   // 検証
   const signature = event.headers.signaturecek || event.headers.SignatureCEK;
@@ -73,17 +104,13 @@ exports.handler = async (event, content) => {
 
   if (requestHandler) {
     await requestHandler.call(ctx, ctx);
-    console.log("--- responseObject ---");
-    console.log(ctx.responseObject);
-    console.log("--- responseObject end ---");
-    //return ctx.responseObject;
     const response =  {
       "isBase64Encoded": false,
       "statusCode": 200,
       "headers": {},
       "body": JSON.stringify(ctx.responseObject),
     }
-    console.log(response);
+    console.log(util.inspect(response), false, null);
     return response;
   } else {
     throw new Error(`Unable to find requestHandler for "${requestType}"`);
