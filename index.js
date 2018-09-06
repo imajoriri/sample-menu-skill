@@ -2,8 +2,7 @@ const clova = require('@line/clova-cek-sdk-nodejs');
 //const bodyParser = require('body-parser');
 
 const clovaSkillHandler = clova.Client
-//exports.handler = clova.Client
-  .configureSkill() // SkillConfiguratorをインスタンス化として戻り値にしている
+  .configureSkill() 
   .onLaunchRequest(responseHelper => {
     responseHelper.setSimpleSpeech({
       lang: 'ja',
@@ -18,7 +17,6 @@ const clovaSkillHandler = clova.Client
     switch (intent) {
       case 'MenuIntent':
       case 'Clova.YesIntent':
-        // Build speechObject directly for response
         responseHelper.setSimpleSpeech({
           lang: 'ja',
           type: 'PlainText',
@@ -26,7 +24,6 @@ const clovaSkillHandler = clova.Client
         });
         break;
       case 'Clova.NoIntent':
-        // Or build speechObject with SpeechBuilder for response
         responseHelper.setSimpleSpeech(
           clova.SpeechBuilder.createSpeechText('いえいえ')
         );
@@ -36,10 +33,7 @@ const clovaSkillHandler = clova.Client
   .onSessionEndedRequest(responseHelper => {
     const sessionId = responseHelper.getSessionId();
 
-    // Do something on session end
   })
-  //.Middleware({ applicationId: "YOUR_APPLICATION_ID" });
-  //.lambda()
 
 exports.handler = async (event, content) => {
   console.log("--- event ---");
@@ -53,8 +47,6 @@ exports.handler = async (event, content) => {
   await clova.verifier(signature, applicationId, requestBody);
   console.log("clear verifier");
 
-  // TODO
-  // ここでnew Context(event);できればOK？
   var ctx = new clova.Context(JSON.parse(event.body));
   const requestType = ctx.requestObject.request.type;
   const requestHandler = clovaSkillHandler.config.requestHandlers[requestType];
@@ -76,7 +68,5 @@ exports.handler = async (event, content) => {
   } else {
     throw new Error(`Unable to find requestHandler for '${requestType}'`);
   }
-  //return clovaSkillHandler.lambda()
 }
 
-//exports.handler = clovaSkillHandler.lambda();
