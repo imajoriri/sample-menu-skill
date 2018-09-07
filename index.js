@@ -10,7 +10,7 @@ const clovaSkillHandler = clova.Client
   .configureSkill() 
   .onLaunchRequest(responseHelper => {
     responseHelper.setSimpleSpeech(
-      clova.SpeechBuilder.createSpeechText(`を食べるか決められないあなたに、オススメのメニューを提案します。朝ご飯、昼ご飯、晩ご飯を指定してください。`)
+      clova.SpeechBuilder.createSpeechText(`を食べるか決められないあなたに、オススメのメニューを提案します。朝、昼、晩を指定してください。`)
     );
   })
   .onIntentRequest(async responseHelper => {
@@ -25,12 +25,13 @@ const clovaSkillHandler = clova.Client
         // スロットに登録していない単語はnullになる。
         if(time === null){
           responseHelper.setSimpleSpeech(
-            clova.SpeechBuilder.createSpeechText(`うまく聞き取れませんでした。朝ご飯、昼ご飯、晩ご飯を指定してください。`)
+            clova.SpeechBuilder.createSpeechText(`うまく聞き取れませんでした。朝、昼、晩を指定してください。`)
           );
           break;
         }
 
         var menu;
+        // メニューを朝、昼、晩、で分けてランダムで取得しています。
         if(time === "朝"){
           menu = breakFirst[Math.floor(Math.random() * breakFirst.length)];
         }
@@ -46,9 +47,13 @@ const clovaSkillHandler = clova.Client
           clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は、${menu.name}です。`)
         );
 
-        // TODO Botにメッセージを送る
-        // ここからBot
+        // ここからBotの処理
+        
+        // Botに送信するためにはuserIdが必要です。
         const userId = responseHelper.getUser().userId;
+
+        // Botに送るメッセージの内容
+        // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
         var message = {
           type: "template",
           altText: `hoge`,
@@ -66,7 +71,9 @@ const clovaSkillHandler = clova.Client
             text: `今日のあなたの${time}ご飯は、${menu.name}だ!!`
           }
         }
-        // Botに送信
+
+        // SDKのメソッドでBotに送信
+        // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
         await client.pushMessage(userId, message)
           .catch( err => {
             console.log("-- err ---");
@@ -74,16 +81,17 @@ const clovaSkillHandler = clova.Client
           });
 
         break;
+      case "Clova.GuideIntent":
       case "Clova.YesIntent":
       case "Clova.NoIntent":
         responseHelper.setSimpleSpeech(
-          clova.SpeechBuilder.createSpeechText(`朝ご飯、昼ご飯、晩ご飯を指定してください。`)
+          clova.SpeechBuilder.createSpeechText(`朝、昼、晩を指定してください。`)
         );
         break;
     }
   })
   .onSessionEndedRequest(responseHelper => {
-    const sessionId = responseHelper.getSessionId();
+    responseHelper.endSession();
 
   })
 
@@ -91,10 +99,10 @@ exports.handler = async (event, content) => {
   console.log("--- event ---");
   console.log(util.inspect(event), false, null);
 
-  // 検証
   const signature = event.headers.signaturecek || event.headers.SignatureCEK;
   const applicationId = process.env["applicationId"];
   const requestBody = event.body;
+  // 検証
   await clova.verifier(signature, applicationId, requestBody);
   console.log("clear verifier");
 
@@ -104,16 +112,31 @@ exports.handler = async (event, content) => {
 
   if (requestHandler) {
     await requestHandler.call(ctx, ctx);
+
+    // CEKに返すレスポンスです。
     const response =  {
       "isBase64Encoded": false,
       "statusCode": 200,
       "headers": {},
       "body": JSON.stringify(ctx.responseObject),
     }
+
     console.log(util.inspect(response), false, null);
+
     return response;
   } else {
     throw new Error(`Unable to find requestHandler for "${requestType}"`);
   }
 }
+
+// 検証を行わない場合以下のコードでも実行することは可能です。
+// TODO ただし、API Gatewayの設定で「Lambdaのプロキシ結合の使用」のチェックを外す必要があります。
+/*
+
+exports.handler = clovaSkillHandler.lambda()
+
+*/
+
+
+
 
