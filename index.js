@@ -43,9 +43,16 @@ const clovaSkillHandler = clova.Client
           menu = dinner[Math.floor(Math.random() * dinner.length)];
         }
 
-        responseHelper.setSimpleSpeech(
-          clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は、${menu.name}です。`)
+        //responseHelper.setSimpleSpeech(
+        // 今日あなたが食べるべき${time}ご飯は${menu.name}です。
+        responseHelper.setSpeechList(
+          [
+            clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は`),
+            clova.SpeechBuilder.createSpeechUrl('https://s3-ap-northeast-1.amazonaws.com/cek-handson/effect-sounds/cooking.mp3'),
+            clova.SpeechBuilder.createSpeechText(`${menu.name}です。`),
+          ]
         );
+
         responseHelper.endSession();
 
         // ここからBotの処理
