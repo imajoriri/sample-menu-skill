@@ -10,7 +10,7 @@ const clovaSkillHandler = clova.Client
   .configureSkill() 
   .onLaunchRequest(responseHelper => {
     responseHelper.setSimpleSpeech(
-      clova.SpeechBuilder.createSpeechText(`を食べるか決められないあなたに、オススメのメニューを提案します。朝、昼、晩を指定してください。`)
+      clova.SpeechBuilder.createSpeechText(`何を食べるか決められないあなたに、オススメのメニューを提案します。朝、昼、晩を指定してください。`)
     );
   })
   .onIntentRequest(async responseHelper => {
@@ -46,6 +46,7 @@ const clovaSkillHandler = clova.Client
         responseHelper.setSimpleSpeech(
           clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は、${menu.name}です。`)
         );
+        responseHelper.endSession();
 
         // ここからBotの処理
         
@@ -56,7 +57,7 @@ const clovaSkillHandler = clova.Client
         // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
         var message = {
           type: "template",
-          altText: `hoge`,
+          altText: `あなたが食べるべき${time}ご飯は...`,
           template: {
             type: "buttons",
             actions: [
@@ -67,7 +68,7 @@ const clovaSkillHandler = clova.Client
               }, 
             ], 
             thumbnailImageUrl: "https://hogehoge",
-            title: `今日のあなたの${time}ご飯は、${menu.name}だ!!`,
+            title: `${menu.name}`,
             text: `今日のあなたの${time}ご飯は、${menu.name}だ!!`
           }
         }
