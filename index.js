@@ -20,7 +20,7 @@ const clovaSkillHandler = clova.Client
     switch (intent) {
       case "MenuIntent":
         // slots取得(朝、昼、晩）
-        const time = responseHelper.getSlot("time");
+        const time = responseHelper.getSlot("timezone");
 
         // スロットに登録していない単語はnullになる。
         if(time === null){
