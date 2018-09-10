@@ -1,9 +1,6 @@
 const clova = require("@line/clova-cek-sdk-nodejs");
 const line = require('@line/bot-sdk');
 const util = require('util');
-const client = new line.Client({
-  channelAccessToken: process.env["channelAccessToken"]
-});
 const { breakFirst, lunch, dinner } = require("./menus");
 
 const clovaSkillHandler = clova.Client
@@ -55,38 +52,43 @@ const clovaSkillHandler = clova.Client
 
         responseHelper.endSession();
 
-        // ここからBotの処理
-        
-        // Botに送信するためにはuserIdが必要です。
-        const userId = responseHelper.getUser().userId;
-
-        // Botに送るメッセージの内容
-        // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
-        var message = {
-          type: "template",
-          altText: `あなたが食べるべき${time}ご飯は...`,
-          template: {
-            type: "buttons",
-            actions: [
-              {
-                type: "uri",
-                label: `レシピを見る`,
-                uri: "https://hogehoge",
-              }, 
-            ], 
-            thumbnailImageUrl: "https://hogehoge",
-            title: `${menu.name}`,
-            text: `今日のあなたの${time}ご飯は、${menu.name}だ!!`
-          }
-        }
-
-        // SDKのメソッドでBotに送信
-        // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
-        await client.pushMessage(userId, message)
-          .catch( err => {
-            console.log("-- err ---");
-            console.log(util.inspect(err), false, null);
+        // channelaccesstokenが環境変数にセットされているときにBotに送信する
+        if(process.env["channelAccessToken"]){
+          const client = new line.Client({
+            channelAccessToken: process.env["channelAccessToken"]
           });
+
+          // Botに送信するためにはuserIdが必要です。
+          const userId = responseHelper.getUser().userId;
+
+          // Botに送るメッセージの内容
+          // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
+          var message = {
+            type: "template",
+            altText: `あなたが食べるべき${time}ご飯は...`,
+            template: {
+              type: "buttons",
+              actions: [
+                {
+                  type: "uri",
+                  label: `レシピを見る`,
+                  uri: "https://hogehoge",
+                }, 
+              ], 
+              thumbnailImageUrl: "https://hogehoge",
+              title: `${menu.name}`,
+              text: `今日のあなたの${time}ご飯は、${menu.name}だ!!`
+            }
+          }
+
+          // SDKのメソッドでBotに送信
+          // 詳しくは >> https://developers.line.me/ja/reference/messaging-api/#send-push-message
+          await client.pushMessage(userId, message)
+            .catch( err => {
+              console.log("-- err ---");
+              console.log(util.inspect(err), false, null);
+            });
+        }
 
         break;
       case "Clova.GuideIntent":
