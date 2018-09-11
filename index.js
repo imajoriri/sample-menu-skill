@@ -7,7 +7,7 @@ const clovaSkillHandler = clova.Client
   .configureSkill() 
   .onLaunchRequest(responseHelper => {
     responseHelper.setSimpleSpeech(
-      clova.SpeechBuilder.createSpeechText(`何を食べるか決められないあなたに、オススメのメニューを提案します。朝、昼、晩を指定してください。`)
+      clova.SpeechBuilder.createSpeechText(`何を食べるか決められないあなたに、オススメのメニューを提案します。朝、昼、夜を指定して、朝に何を食べたらいい？などと聞いてください`)
     );
   })
   .onIntentRequest(async responseHelper => {
@@ -16,26 +16,26 @@ const clovaSkillHandler = clova.Client
 
     switch (intent) {
       case "MenuIntent":
-        // slots取得(朝、昼、晩）
+        // slots取得(朝、昼、夜）
         const time = responseHelper.getSlot("timezone");
 
         // スロットに登録していない単語はnullになる。
         if(time === null){
           responseHelper.setSimpleSpeech(
-            clova.SpeechBuilder.createSpeechText(`うまく聞き取れませんでした。朝、昼、晩を指定してください。`)
+            clova.SpeechBuilder.createSpeechText(`うまく聞き取れませんでした。朝、昼、夜を指定してください。`)
           );
           break;
         }
 
         var menu;
-        // メニューを朝、昼、晩、で分けてランダムで取得しています。
+        // メニューを朝、昼、夜、で分けてランダムで取得しています。
         if(time === "朝"){
           menu = breakFirst[Math.floor(Math.random() * breakFirst.length)];
         }
         else if(time === "昼"){
           menu = lunch[Math.floor(Math.random() * lunch.length)];
         }
-        //else if(time === "晩"){
+        //else if(time === "夜"){
         else{
           menu = dinner[Math.floor(Math.random() * dinner.length)];
         }
@@ -45,7 +45,7 @@ const clovaSkillHandler = clova.Client
         responseHelper.setSpeechList(
           [
             clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は`),
-            clova.SpeechBuilder.createSpeechUrl('https://s3-ap-northeast-1.amazonaws.com/cek-handson/effect-sounds/cooking.mp3'),
+            //clova.SpeechBuilder.createSpeechUrl('https://s3-ap-northeast-1.amazonaws.com/cek-handson/effect-sounds/cooking.mp3'),
             clova.SpeechBuilder.createSpeechText(`${menu.name}です。`),
           ]
         );
@@ -95,7 +95,7 @@ const clovaSkillHandler = clova.Client
       case "Clova.YesIntent":
       case "Clova.NoIntent":
         responseHelper.setSimpleSpeech(
-          clova.SpeechBuilder.createSpeechText(`朝、昼、晩を指定してください。`)
+          clova.SpeechBuilder.createSpeechText(`朝、昼、夜を指定してください。`)
         );
         break;
     }
