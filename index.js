@@ -72,10 +72,10 @@ const clovaSkillHandler = clova.Client
                 {
                   type: "uri",
                   label: `レシピを見る`,
-                  uri: "https://hogehoge",
+                  uri: menu.recipe,
                 }, 
               ], 
-              thumbnailImageUrl: "https://hogehoge",
+              thumbnailImageUrl: menu.image,
               title: `${menu.name}`,
               text: `今日のあなたの${time}ご飯は、${menu.name}だ!!`
             }
