@@ -19,6 +19,7 @@ const clovaSkillHandler = clova.Client
         // slots取得(朝、昼、夜）
         const time = responseHelper.getSlot("timezone");
 
+        // TODO スロットがNULLの時の処理が必要
         // スロットに登録していない単語はnullになる。
         if(time === null){
           responseHelper.setSimpleSpeech(
@@ -35,17 +36,14 @@ const clovaSkillHandler = clova.Client
         else if(time === "昼"){
           menu = lunch[Math.floor(Math.random() * lunch.length)];
         }
-        //else if(time === "夜"){
         else{
           menu = dinner[Math.floor(Math.random() * dinner.length)];
         }
 
-        //responseHelper.setSimpleSpeech(
         // 今日あなたが食べるべき${time}ご飯は${menu.name}です。
         responseHelper.setSpeechList(
           [
             clova.SpeechBuilder.createSpeechText(`今日あなたが食べるべき${time}ご飯は`),
-            //clova.SpeechBuilder.createSpeechUrl('https://s3-ap-northeast-1.amazonaws.com/cek-handson/effect-sounds/cooking.mp3'),
             clova.SpeechBuilder.createSpeechText(`${menu.name}です。`),
           ]
         );
@@ -113,6 +111,7 @@ exports.handler = async (event, content) => {
   const applicationId = process.env["applicationId"];
   const requestBody = event.body;
   // 検証
+  // リクエストが自分の作成したスキルからであるか等を確認しています。
   await clova.verifier(signature, applicationId, requestBody);
   console.log("clear verifier");
 
@@ -124,6 +123,8 @@ exports.handler = async (event, content) => {
     await requestHandler.call(ctx, ctx);
 
     // CEKに返すレスポンスです。
+    // API Gatewayの設定で「Lambdaのプロキシ結合の使用」のチェックを入れた場合、
+    // レスポンスにヘッダー等を入れる必要がある
     const response =  {
       "isBase64Encoded": false,
       "statusCode": 200,
@@ -141,6 +142,7 @@ exports.handler = async (event, content) => {
 
 // 検証を行わない場合以下のコードでも実行することは可能です。
 // TODO ただし、API Gatewayの設定で「Lambdaのプロキシ結合の使用」のチェックを外す必要があります。
+
 /*
 
 exports.handler = clovaSkillHandler.lambda()
